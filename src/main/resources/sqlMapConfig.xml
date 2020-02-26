@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="oracle.jdbc.driver.OracleDriver" />
+				<property name="url" value="${url}" />
+				<property name="username" value="${username}" />
+				<property name="password" value="${password}" />
+				<property name="poolPingQuery" value="SELECT 1 FROM DUAL" />
+				<property name="poolPingEnabled" value="true" />
+                <property name="poolMaximumActiveConnections" value="300" /><!--最大活跃连接数 -->
+                <property name="poolMaximumIdleConnections" value="5" /><!--最大空闲连接数-->
+                <property name="poolTimeToWait" value="20000" /><!--创建连接时最大等待时间20s-->
+			</dataSource>
+		</environment>
+	</environments>
+
+	<mappers>
+		<mapper resource="cn/cpic/dmgr/dao/entity/xml/DbpfSourceTableMapper.xml" />
+
+	</mappers>
+	<!-- <settings name="logImpl" value="STDOUT_LOGGING"></settings> -->
+</configuration>

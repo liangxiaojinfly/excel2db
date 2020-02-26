@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cpic.dmgr.dao.mapper.DbpfSourceTableMapper">
+	<resultMap id="BaseResultMap" type="cn.cpic.dmgr.dao.entity.DbpfSourceTable">
+		<id column="ID" property="id" jdbcType="DECIMAL" />
+		<result column="TABLE_NAME" property="tableName" jdbcType="VARCHAR" />
+		<result column="SOURCE_CODE" property="sourceCode" jdbcType="VARCHAR" />
+		<result column="S_TAB_NAME" property="sTabName" jdbcType="VARCHAR" />
+		<result column="ETL_FREQUENCY" property="etlFrequency" jdbcType="VARCHAR" />
+		<result column="DES_CHINESE" property="desChinese" jdbcType="VARCHAR" />
+		<result column="IS_VALID" property="isValid" jdbcType="DECIMAL" />
+		<result column="SRC_FULL_DATA" property="srcFullData" jdbcType="VARCHAR" />
+		<result column="ONLINE_DATE" property="onlineDate" jdbcType="VARCHAR" />
+		<result column="XFFS" property="xffs" jdbcType="VARCHAR" />
+		<result column="FAMILY_NAME" property="familyName" jdbcType="VARCHAR" />
+		<result column="ZK" property="zk" jdbcType="VARCHAR" />
+		<result column="ZK_PORT" property="zkPort" jdbcType="VARCHAR" />
+		<result column="SPLITKEY" property="splitkey" jdbcType="VARCHAR" />
+		<result column="SQL_FILTER" property="sqlFilter" jdbcType="VARCHAR" />
+		<result column="INSERT_FILTER" property="insertFilter" jdbcType="VARCHAR" />
+		<result column="CHAR_SET" property="charSet" jdbcType="VARCHAR" />
+		<result column="DELETE_FILTER" property="deleteFilter" jdbcType="VARCHAR" />
+		<result column="ORG_CHAR_SET" property="orgCharSet" jdbcType="VARCHAR" />
+		<result column="END_SEPARATOR" property="endSeparator" jdbcType="VARCHAR" />
+		<result column="JAVASPLITKEY" property="javasplitkey" jdbcType="VARCHAR" />
+		<result column="BATCH_DATA" property="batchData" jdbcType="VARCHAR" />
+		<result column="HDFSPATH" property="hdfspath" jdbcType="VARCHAR" />
+		<result column="DOWN_PATH_FLAG" property="downPathFlag" jdbcType="VARCHAR" />
+		<result column="SOURCE_TYPE" property="sourceType" jdbcType="VARCHAR" />
+		<result column="SOUREC_PATH" property="sourecPath" jdbcType="VARCHAR" />
+		<result column="BATCH_NUM" property="batchNum" jdbcType="VARCHAR" />
+		<result column="DELETE_VALUE" property="deleteValue" jdbcType="VARCHAR" />
+		<result column="DELETE_FIELD" property="deleteField" jdbcType="VARCHAR" />
+		<result column="CREATED_DATE" property="createdDate" jdbcType="TIMESTAMP" />
+		<result column="MODIFIED_BY" property="modifiedBy" jdbcType="VARCHAR" />
+		<result column="CREATED_BY" property="createdBy" jdbcType="VARCHAR" />
+		<result column="MODIFIED_DATE" property="modifiedDate" jdbcType="TIMESTAMP" />
+		<result column="REL_TABLE_ID" property="relTableId" jdbcType="DECIMAL" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		ID, TABLE_NAME, SOURCE_CODE, S_TAB_NAME, ETL_FREQUENCY,
+		DES_CHINESE,
+		IS_VALID, SRC_FULL_DATA,
+		ONLINE_DATE, XFFS, FAMILY_NAME,
+		ZK, ZK_PORT, SPLITKEY, SQL_FILTER, INSERT_FILTER,
+		CHAR_SET,
+		DELETE_FILTER, ORG_CHAR_SET, END_SEPARATOR, JAVASPLITKEY,
+		BATCH_DATA,
+		HDFSPATH,
+		DOWN_PATH_FLAG, SOURCE_TYPE, SOUREC_PATH, BATCH_NUM,
+		DELETE_VALUE, DELETE_FIELD,
+		CREATED_DATE, MODIFIED_BY, CREATED_BY,
+		MODIFIED_DATE,REL_TABLE_ID
+	</sql>
+
+	<!-- 需要创建或者更新的表 -->
+	<!-- from dbpf_source_table dst where (dst.online_date = to_char(sysdate,'yyyymmdd') 
+		or dst.id in (select dsf.table_id from dbpf_source_field dsf where dsf.online_date 
+		= to_char(sysdate,'yyyymmdd')) ) and (dst.is_valid = 4 or dst.is_valid = 
+		1) -->
+	<select id="needCreateOrUpdateTabs" parameterType="java.lang.Long"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from dbpf_source_table dst where IS_VALID =1 AND (dst.online_date =
+		to_char(sysdate,'yyyymmdd') or dst.id in
+		(select dsf.table_id from
+		dbpf_source_field dsf where dsf.online_date
+		=
+		to_char(sysdate,'yyyymmdd') IS_VALID =1 ) )
+	</select>
+
+	<select id="selectByPrimaryKeyList" resultMap="BaseResultMap"
+		parameterType="java.util.List">
+		select
+		<include refid="Base_Column_List" />
+		from DBPF_SOURCE_TABLE
+		where IS_VALID =1 AND ID in
+		<foreach collection="list" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+
+
+
+
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from DBPF_SOURCE_TABLE
+		where ID = #{id,jdbcType=DECIMAL}
+	</select>
+
+	<select id="selectByTableName" resultMap="BaseResultMap" parameterType="cn.cpic.dmgr.dao.entity.DbpfSourceTable">
+		select
+		<include refid="Base_Column_List" />
+		from DBPF_SOURCE_TABLE
+		where 1 = 1
+		<if test="tableName != null">
+			and upper(table_Name) = upper(#{tableName,jdbcType=VARCHAR})
+		</if>
+	</select>
+
+	<insert id="insertTable" parameterType="cn.cpic.dmgr.dao.entity.DbpfSourceTable" >
+        <selectKey keyProperty="id" resultType="java.lang.Long" order="BEFORE">
+            select source_table_sequence.NEXTVAL as id from dual
+        </selectKey>
+        insert into DBPF_SOURCE_TABLE (id,table_name,source_code,s_tab_name,etl_frequency,des_chinese,is_valid,online_date,xffs,batch_num,
+        created_by,created_date,
+        char_set,org_char_set,end_separator,javasplitkey,hdfspath
+        )
+        values (#{id}, #{tableName,jdbcType=VARCHAR},#{sourceCode,jdbcType=VARCHAR},#{sTabName,jdbcType=VARCHAR},
+        #{etlFrequency,jdbcType=VARCHAR},#{desChinese,jdbcType=VARCHAR},#{isValid,jdbcType=DOUBLE},#{onlineDate,jdbcType=VARCHAR},
+        #{xffs,jdbcType=VARCHAR},#{batchNum,jdbcType=VARCHAR},#{createdBy,jdbcType=VARCHAR},sysdate,
+        #{charSet,jdbcType=VARCHAR},#{orgCharSet,jdbcType=VARCHAR},#{endSeparator,jdbcType=VARCHAR},#{javasplitkey,jdbcType=VARCHAR},
+        #{hdfspath,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <update id="updateTable" parameterType="cn.cpic.dmgr.dao.entity.DbpfSourceTable">
+        update DBPF_SOURCE_TABLE
+        <set>
+            table_name = #{tableName,jdbcType=VARCHAR},
+            source_code = #{sourceCode,jdbcType=VARCHAR},
+            s_tab_name = #{sTabName,jdbcType=VARCHAR},
+            etl_frequency = #{etlFrequency,jdbcType=VARCHAR},
+            des_chinese = #{desChinese,jdbcType=VARCHAR},
+            is_valid = #{isValid,jdbcType=DECIMAL},
+            online_date = #{onlineDate,jdbcType=VARCHAR},
+            xffs = #{xffs,jdbcType=VARCHAR},
+            batch_num = #{batchNum,jdbcType=VARCHAR},
+            created_by = #{createdBy,jdbcType=VARCHAR},
+            modified_date = sysdate,
+            char_set = #{charSet,jdbcType=VARCHAR},
+            org_char_set = #{orgCharSet,jdbcType=VARCHAR},
+            end_separator = #{endSeparator,jdbcType=VARCHAR},
+            javasplitkey = #{javasplitkey,jdbcType=VARCHAR},
+            hdfspath = #{hdfspath,jdbcType=VARCHAR}
+        </set>
+        where ID = #{id,jdbcType=DECIMAL}
+    </update>
+</mapper>
